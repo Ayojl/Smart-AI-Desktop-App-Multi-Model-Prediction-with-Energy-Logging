@@ -7,7 +7,7 @@ import sys
 
 def open_main():
     root.destroy()
-    main_gui.main_window()
+    main_gui.main_gui()
 
 def show_about():
     messagebox.showinfo(" À propos ", "Projet réalisé par Ayoub Ouijili \n Encadrant : Dr. EL MKHALET MOUNA\n Année : 2024-2025")
