@@ -1,14 +1,20 @@
 import sys
 import os
 import pandas as pd
+from datetime import datetime
 
-model_logs = []
+# Dictionary to store metrics for each model
+model_metrics = {}
 
 def save_model_metrics(model_name, duration, energy):
-    model_logs.append({
-        "Model": model_name,
-        "Execution Time (s)": round(duration, 2),
-        "Energy (kJ)": round(energy, 2)
+    """Save metrics for a model"""
+    if model_name not in model_metrics:
+        model_metrics[model_name] = []
+    
+    model_metrics[model_name].append({
+        'timestamp': datetime.now(),
+        'duration': duration,
+        'energy': energy
     })
 
 def get_app_path():
@@ -17,8 +23,42 @@ def get_app_path():
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))
 
-def export_metrics_to_excel():
-    if model_logs:
-        output_path = os.path.join(get_app_path(), "metrics.xlsx")
-        df = pd.DataFrame(model_logs)
-        df.to_excel(output_path, index=False)
+def generate_excel_report():
+    """Generate Excel report with all model metrics"""
+    try:
+        # Create DataFrame from metrics
+        data = []
+        for model_name, metrics in model_metrics.items():
+            for metric in metrics:
+                data.append({
+                    'Modèle': model_name,
+                    'Date/Heure': metric['timestamp'],
+                    'Durée (s)': metric['duration'],
+                    'Énergie (kJ)': metric['energy']
+                })
+        
+        if not data:
+            print("Aucune métrique à exporter")
+            return
+        
+        df = pd.DataFrame(data)
+        
+        # Create Excel writer
+        filename = 'metrics.xlsx'
+        with pd.ExcelWriter(filename, engine='openpyxl') as writer:
+            # Write main metrics
+            df.to_excel(writer, sheet_name='Métriques', index=False)
+            
+            # Calculate and write summary statistics
+            summary = df.groupby('Modèle').agg({
+                'Durée (s)': ['mean', 'min', 'max'],
+                'Énergie (kJ)': ['mean', 'min', 'max']
+            }).round(2)
+            
+            summary.to_excel(writer, sheet_name='Résumé')
+        
+        print(f"Rapport généré avec succès: {filename}")
+        return True
+    except Exception as e:
+        print(f"Erreur lors de la génération du rapport: {e}")
+        return False
