@@ -5,10 +5,13 @@ from arima_page import arima_page
 from random_forest_page import random_forest_page
 from cross_validation_page import cross_validation_page
 from utils import generate_excel_report
+# from report_page import report_page
+import time
 
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.session_start = time.time()
         self.title("Application d'IA")
         self.geometry("800x600")
         self.minsize(700, 500)
@@ -23,13 +26,30 @@ class App(ctk.CTk):
         for i in range(8):
             self.card_frame.grid_rowconfigure(i, weight=1)
 
+        # Informations de l'étudiant et de l'encadrant
+        self.student_label = ctk.CTkLabel(
+            self.card_frame,
+            text="Étudiant: Ayoub Ouijili",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color="#ffffff"
+        )
+        self.student_label.grid(row=0, column=0, pady=(20, 0), sticky="n")
+
+        self.supervisor_label = ctk.CTkLabel(
+            self.card_frame,
+            text="Encadrant: Dr. EL MKHALET MOUNA",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color="#ffffff"
+        )
+        self.supervisor_label.grid(row=1, column=0, pady=(5, 20), sticky="n")
+
         # Titre principal
         self.title_label = ctk.CTkLabel(
             self.card_frame,
             text="Application d'Intelligence Artificielle",
             font=ctk.CTkFont(size=26, weight="bold")
         )
-        self.title_label.grid(row=0, column=0, pady=(30, 5), sticky="n")
+        self.title_label.grid(row=2, column=0, pady=(0, 5), sticky="n")
 
         # Sous-titre inspirant
         self.subtitle_label = ctk.CTkLabel(
@@ -38,12 +58,12 @@ class App(ctk.CTk):
             font=ctk.CTkFont(size=15, weight="normal"),
             text_color="#bbbbbb"
         )
-        self.subtitle_label.grid(row=1, column=0, pady=(0, 15), sticky="n")
+        self.subtitle_label.grid(row=3, column=0, pady=(0, 15), sticky="n")
 
         # Bloc de boutons (toujours dans la carte)
         self.buttons_frame = ctk.CTkFrame(self.card_frame, fg_color="#232323", corner_radius=20)
-        self.buttons_frame.grid(row=2, column=0, pady=(0, 0), sticky="n")
-        for i in range(5):
+        self.buttons_frame.grid(row=4, column=0, pady=(0, 0), sticky="n")
+        for i in range(6):
             self.buttons_frame.grid_rowconfigure(i, weight=1)
         self.buttons_frame.grid_columnconfigure(0, weight=1)
 
@@ -52,10 +72,11 @@ class App(ctk.CTk):
         self.create_button("ARIMA", self.open_arima, "#7d1fa3", "#b266ff", 2)
         self.create_button("Random Forest", self.open_random_forest, "#ffb300", "#ffd966", 3)
         self.create_button("Cross Validation", self.open_cross_validation, "#a83232", "#ff6666", 4)
+        # self.create_button("Rapport Excel", self.open_report_page, "#1976d2", "#64b5f6", 5)
 
         # Espaceur flexible
         self.spacer = ctk.CTkLabel(self.card_frame, text="")
-        self.spacer.grid(row=3, column=0, sticky="nswe")
+        self.spacer.grid(row=5, column=0, sticky="nswe")
 
         # Quit button toujours en bas de la carte
         self.quit_button = ctk.CTkButton(
@@ -97,7 +118,9 @@ class App(ctk.CTk):
         cross_validation_page(self)
     def quit_app(self):
         try:
-            generate_excel_report()
+            session_end = time.time()
+            session_duration = session_end - self.session_start
+            generate_excel_report(session_duration)
             self.quit()
         except Exception as e:
             print(f"Error generating report: {e}")
